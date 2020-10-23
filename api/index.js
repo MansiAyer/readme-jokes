@@ -1,13 +1,15 @@
 let jokes = require('../src/jokes.json');
-const { CONSTANTS } = require('../src/utils');
+const { CONSTANTS, getRandomArrayElement } = require('../src/utils');
 const { qnaCard, quoteCard } = require('../src/renderJokesCard');
-const theme = require('../src/themes');
+const themes = require('../src/themes');
 
 // Max cache age (Currently = 60 seconds)
 const cacheSeconds = CONSTANTS.TEN_SECONDS;
 
 module.exports = async (req, res) => {
   let index = Math.floor(Math.random() * Object.keys(jokes).length);
+  let renderJoke = ``;
+
   let {
     borderColor,
     qColor,
@@ -15,8 +17,22 @@ module.exports = async (req, res) => {
     textColor,
     bgColor,
     codeColor,
+    quoteColor,
+    theme,
   } = req.query;
-  let renderJoke = ``;
+
+  theme = theme ? theme.toLowerCase() : theme;
+
+  if(theme === 'random') theme = getRandomArrayElement(Object.keys(themes));
+
+  if(!themes[theme]) theme = 'default';
+  const colorTheme = themes[theme];
+  borderColor = borderColor ? borderColor : colorTheme.borderColor;
+  bgColor = bgColor ? bgColor : colorTheme.bgColor;
+  qColor = qColor ? qColor : colorTheme.qColor;
+  aColor = aColor ? aColor : colorTheme.aColor;
+  quoteColor = quoteColor ? quoteColor : colorTheme.quoteColor;
+  codeColor = codeColor ? codeColor : colorTheme.codeColor;
 
   if (jokes[index].q) {
     let question = jokes[index].q;
